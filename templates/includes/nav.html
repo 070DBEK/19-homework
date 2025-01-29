@@ -1,0 +1,11 @@
+
+<nav class="bg-blue-600 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="{% url 'home' %}" class="text-2xl font-bold">Test Maker</a>
+        <ul class="flex space-x-4">
+            <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
+            <li><a href="{% url 'questions:list' %}" class="hover:underline">Tests</a></li>
+            <li><a href="{% url 'lessons:list' %}" class="hover:underline">Lessons</a></li>
+        </ul>
+    </div>
+</nav>

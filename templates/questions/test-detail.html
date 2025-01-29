@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Test Maker - Test Detail
+{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">Test Details: {{ test.name }}</h1>
+
+<div class="mb-4">
+    <strong>Lesson: </strong>{{ test.lesson }}
+</div>
+
+<div class="mb-4">
+    <strong>Test Description:</strong>
+    <p>{{ test.description }}</p>
+</div>
+
+<div class="border-t border-gray-300 pt-4">
+    <h2 class="text-2xl font-bold mb-4">Questions</h2>
+    <div class="space-y-4">
+        {% if test.questions.count == 0 %}
+        <p>No questions available for this test.</p>
+        {% else %}
+        {% for question in test.questions.all %}
+        <div class="border border-gray-300 rounded p-4">
+            <h3 class="text-xl font-semibold mb-2">Question {{ forloop.counter }}</h3>
+            <div class="mb-2">
+                <strong>Question Text:</strong>
+                <p>{{ question.text }}</p>
+            </div>
+            <div class="space-y-2">
+                {% for answer in question.answers.all %}
+                <div>
+                    <strong>Answer:</strong> {{ answer.text }}
+                    <label class="inline-flex items-center mt-1">
+                        {{ answer.is_correct }}
+                        <span class="ml-2">Correct Answer</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<a href="{% url 'questions:list' %}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 mt-4 inline-block">Back to Test List</a>
+
+{% endblock %}

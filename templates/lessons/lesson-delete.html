@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Lesson{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">Delete Lesson</h1>
+<p>Are you sure you want to delete "{{ lesson.name }}"?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete</button>
+    <a href="{% url 'lessons:list' %}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</a>
+</form>
+
+{% endblock %}
