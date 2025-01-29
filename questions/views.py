@@ -26,53 +26,37 @@ def create_test(request):
                             answer.question = question
                             answer.save()
             return redirect('questions:list')
-
     form = TestForm()
     question_formset = QuestionFormSet(queryset=Question.objects.none())
     answer_formset = AnswerFormSet(queryset=Answer.objects.none())
-    return render(request, 'questions/test-formset.html', {'form': form, 'question_formset': question_formset, 'answer_formset': answer_formset})
-
-
-# def update_test(request, pk):
-#     test = get_object_or_404(Test, pk=pk)
-#     if request.method == "POST":
-#         form = TestForm(request.POST, instance=test)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('questions:list')
-#     form = TestForm(instance=test)
-#     return render(request, 'questions/test-formset.html', {'form': form})
+    return render(request, 'questions/test-formset.html', {
+        'form': form,
+        'question_formset': question_formset,
+        'answer_formset': answer_formset
+    })
 
 
 def update_test(request, pk):
     test = get_object_or_404(Test, pk=pk)
-
     if request.method == "POST":
         form = TestForm(request.POST, instance=test)
         question_formset = QuestionFormSet(request.POST, queryset=Question.objects.filter(test=test))
-
         if form.is_valid() and question_formset.is_valid():
             form.save()
-
             for question_form in question_formset:
                 question = question_form.save(commit=False)
                 question.test = test  # Test bilan bog‘lash
                 question.save()
-
-                # Har bir savol uchun javoblarni olish
                 answer_formset = AnswerFormSet(request.POST, queryset=Answer.objects.filter(question=question))
                 if answer_formset.is_valid():
                     for answer_form in answer_formset:
                         answer = answer_form.save(commit=False)
-                        answer.question = question  # Savol bilan bog‘lash
+                        answer.question = question  #
                         answer.save()
-
             return redirect('questions:list')
-
     else:
         form = TestForm(instance=test)
         question_formset = QuestionFormSet(queryset=Question.objects.filter(test=test))
-
     return render(request, 'questions/test-formset.html', {
         'form': form,
         'question_formset': question_formset
@@ -81,7 +65,12 @@ def update_test(request, pk):
 
 def test_detail(request, pk):
     test = get_object_or_404(Test, pk=pk)
-    return render(request, 'questions/test-detail.html', {'test': test})
+    questions = test.questions.all()
+    context = {
+        'test': test,
+        'questions': questions,
+    }
+    return render(request, 'questions/test-detail.html', context)
 
 
 def test_delete(request, pk):

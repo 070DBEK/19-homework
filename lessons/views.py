@@ -16,7 +16,11 @@ def lessons_list(request):
 
 def lesson_detail(request, pk):
     lesson = get_object_or_404(Lesson, pk=pk)
-    return render(request, 'lessons/lesson-detail.html', {'lesson': lesson})
+    tests = Test.objects.filter(lesson=lesson)
+    return render(request, 'lessons/lesson-detail.html', {
+        'lesson': lesson,
+        'tests': tests,
+    })
 
 
 def create_lesson(request):
@@ -30,10 +34,23 @@ def create_lesson(request):
     return render(request, 'lessons/lesson-create.html', {'form': form})
 
 
+def update_lesson(request, pk):
+    lesson = get_object_or_404(Lesson, pk=pk)
+    if request.method == 'POST':
+        form = LessonForm(request.POST, instance=lesson)
+        if form.is_valid():
+            form.save()
+            return redirect('lessons:list')
+    else:
+        form = LessonForm(instance=lesson)
+    return render(request, 'lessons/lesson-create.html', {'form': form, 'lesson': lesson})
+
+
 def lesson_delete(request, pk):
     lesson = get_object_or_404(Lesson, pk=pk)
-    tests = Test.objects.filter(lesson)
-    if request.method == "POST":
+    tests = Test.objects.filter(lesson=lesson)
+    if request.method == 'POST':
+        tests.delete()
         lesson.delete()
         return redirect('lessons:list')
     return render(request, 'lessons/lesson-delete.html', {'lesson': lesson, 'tests': tests})

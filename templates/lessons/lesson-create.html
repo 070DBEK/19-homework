@@ -1,19 +1,46 @@
 {% extends 'base.html' %}
 
-{% block title %}Test Maker - Create Lesson{% endblock %}
+{% block title %}Test Maker - {% if lesson %}Update Lesson{% else %}Create Lesson{% endif %}{% endblock %}
 
 {% block content %}
 
-<h1 class="text-4xl font-bold mb-8">Create Lesson</h1>
-<form method="post" class="space-y-4">
+<h1 class="text-4xl font-bold mb-8">
+    {% if lesson %}
+        Update Lesson
+    {% else %}
+        Create Lesson
+    {% endif %}
+</h1>
 
+<form method="post" class="space-y-4">
     {% csrf_token %}
-    {{ form.as_p }}
+
     <div>
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Create Lesson</button>
-        <a href="{% url 'lessons:list' %}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2">Cancel</a>
+        <label for="id_name" class="block font-semibold">Lesson Name:</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+            <p class="text-red-600">{{ form.name.errors.0 }}</p>
+        {% endif %}
     </div>
 
+    <div>
+        <label for="id_desc" class="block font-semibold">Lesson Description:</label>
+        {{ form.desc }}
+        {% if form.desc.errors %}
+            <p class="text-red-600">{{ form.desc.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <div class="border-t border-gray-300 pt-4">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            {% if lesson %}
+                Update Lesson
+            {% else %}
+                Create Lesson
+            {% endif %}
+        </button>
+        <a href="{% url 'lessons:list' %}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 ml-2">Cancel</a>
+    </div>
 </form>
 
 {% endblock %}

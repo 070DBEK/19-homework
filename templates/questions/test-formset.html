@@ -1,62 +1,121 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Test Maker - {% if test %}Update Test{% else %}Create Test{% endif %}
+    Test Maker - {% if test %}Update Test{% else %}Create Test{% endif %}
 {% endblock %}
 
 {% block content %}
 
-<h1 class="text-4xl font-bold mb-8">
-    {% if test %}
-        Update Test
-    {% else %}
-        Create Test
-    {% endif %}
-</h1>
-
-<form class="space-y-4" method="post" enctype="multipart/form-data">
+<form class="space-y-4" method="post">
     {% csrf_token %}
-    <div>
-        <label for="{{ form.name.id_for_label }}" class="block mb-2">{{ form.name.label }}:</label>
-        {{ form.name }}
-    </div>
-    <div>
-        <label for="{{ form.lesson.id_for_label }}" class="block mb-2">{{ form.lesson.label }}:</label>
-        {{ form.lesson }}
-    </div>
-    <div class="border-t border-gray-300 pt-4">
-        <h2 class="text-2xl font-bold mb-4">Questions</h2>
-        <div class="space-y-4" id="questions-container">
-            {% for question_form in question_formset %}
-            <div class="question-formset border border-gray-300 rounded p-4">
-                <h3 class="text-xl font-semibold mb-2">Question {{ forloop.counter }}</h3>
-                <div class="mb-2">
-                    <label for="{{ question_form.text.id_for_label }}" class="block mb-2">{{ question_form.text.label }}:</label>
-                    {{ question_form.text }}
-                </div>
-                <div class="space-y-2">
-                    {% for answer_form in question_form.answers %}
-                    <div>
-                        <label for="{{ answer_form.text.id_for_label }}" class="block mb-2">{{ answer_form.text.label }}:</label>
-                        {{ answer_form.text }}
-                        <label class="inline-flex items-center mt-1">
-                            {{ answer_form.is_correct }}
-                            <span class="ml-2">Correct Answer</span>
-                        </label>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+
+    <!-- Form-wide Errors -->
+    {% if form.non_field_errors %}
+        <div class="text-red-600 mb-4">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
             {% endfor %}
         </div>
+    {% endif %}
+
+    <!-- Name and Lesson Field Errors -->
+    <div>
+        {% if form.name.errors %}
+            <div class="text-red-600 mb-2">{{ form.name.errors }}</div>
+        {% endif %}
+        {% if form.lesson.errors %}
+            <div class="text-red-600 mb-2">{{ form.lesson.errors }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Render the form fields for name, lesson, etc. -->
+    {{ form.as_p }}
+
+    <!-- Management Form for Question Formset -->
+    {{ question_formset.management_form }}
+
+    <div class="border-t border-gray-300 pt-4">
+        <h2 class="text-2xl font-bold mb-4">Questions</h2>
+
+        <!-- Questions Container -->
+        <div id="questions-container">
+            {% for form in question_formset %}
+                <div class="question-formset border border-gray-300 rounded p-4 mt-4">
+                    <h3 class="text-xl font-semibold mb-2">Question {{ forloop.counter }}</h3>
+
+                    <!-- Display errors for question fields -->
+                    {% if form.text.errors %}
+                        <div class="text-red-600 mb-2">{{ form.text.errors }}</div>
+                    {% endif %}
+
+                    {{ form.as_p }}
+
+                    <!-- Display errors for each answer inside question formset -->
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <div class="text-red-600 mb-2">
+                                {% for error in field.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Add Question Button -->
         <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4" id="add-question">
-            {% if question %}
-                Update Question
-            {% else %}
-                Add Question
-            {% endif %}
+            Add Question
         </button>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let questionCount = parseInt(document.querySelector('[name="questions-TOTAL_FORMS"]').value);
+
+            // Handle "Add Question" button click
+            document.getElementById('add-question').addEventListener('click', function () {
+                const questionContainer = document.getElementById('questions-container');
+                const newQuestionDiv = document.createElement('div');
+
+                newQuestionDiv.classList.add('question-formset', 'border', 'border-gray-300', 'rounded', 'p-4', 'mt-4');
+                newQuestionDiv.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-2">Question ${questionCount + 1}</h3>
+                    <div class="mb-2">
+                        <label for="id_questions-${questionCount}-text" class="block mb-2">Question:</label>
+                        <input type="text" id="id_questions-${questionCount}-text" name="questions-${questionCount}-text" class="w-full border border-gray-300 rounded p-2" required>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <label for="id_questions-${questionCount}-answers-0-text" class="block mb-2">Answer 1:</label>
+                            <input type="text" id="id_questions-${questionCount}-answers-0-text" name="questions-${questionCount}-answers-0-text" class="w-full border border-gray-300 rounded p-2" required>
+                            <label class="inline-flex items-center mt-1">
+                                <input type="checkbox" name="questions-${questionCount}-answers-0-is_correct" class="form-checkbox">
+                                <span class="ml-2">Correct Answer</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label for="id_questions-${questionCount}-answers-1-text" class="block mb-2">Answer 2:</label>
+                            <input type="text" id="id_questions-${questionCount}-answers-1-text" name="questions-${questionCount}-answers-1-text" class="w-full border border-gray-300 rounded p-2" required>
+                            <label class="inline-flex items-center mt-1">
+                                <input type="checkbox" name="questions-${questionCount}-answers-1-is_correct" class="form-checkbox">
+                                <span class="ml-2">Correct Answer</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+
+                questionContainer.appendChild(newQuestionDiv);
+                questionCount++;
+
+                // Update TOTAL_FORMS field in management form
+                document.querySelector('[name="questions-TOTAL_FORMS"]').value = questionCount;
+            });
+        });
+    </script>
+
+    <!-- Submit Button -->
     <div>
         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             {% if test %}
